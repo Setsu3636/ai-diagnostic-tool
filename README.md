@@ -1,1 +1,1 @@
-# ai-diagnostic-tool2
+# ai-diagnostic-tool
