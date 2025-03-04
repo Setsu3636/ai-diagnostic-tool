@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI診断ツール</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            width: 90%;
+            max-width: 500px;
+            transition: all 0.3s ease;
+        }
+        .header {
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            color: #0066cc;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background-color: #0066cc;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .question {
+            font-size: 20px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        .options button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            background: #0066cc;
+            color: white;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .options button:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        .options button:active {
+            transform: translateY(0);
+        }
+        .result {
+            display: none;
+        }
+        .result-card {
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #0066cc;
+        }
+        .result-description {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .restart-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s ease;
+        }
+        .restart-btn:hover {
+            background: #218838;
+        }
+        .fade {
+            animation: fadeEffect 0.5s;
+        }
+        @keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI診断ツール</h1>
+            <p>あなたのAIとの相性を診断します</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        
+        <div id="question-container" class="fade">
+            <p class="question" id="question-text">AIに興味がありますか？</p>
+            <div class="options" id="options-container">
+                <button onclick="selectOption(1)">はい</button>
+                <button onclick="selectOption(0)">いいえ</button>
+            </div>
+        </div>
+        
+        <div class="result" id="result-container">
+            <div class="result-card">
+                <div class="result-title" id="result-title"></div>
+                <p class="result-description" id="result-description"></p>
+            </div>
+            <button class="restart-btn" onclick="restartQuiz()">もう一度診断する</button>
+        </div>
+    </div>
+    
+    <script>
+        let score = 0;
+        let currentQuestion = 0;
+        const questions = [
+            "AIに興味がありますか？",
+            "すでにAIを活用していますか？",
+            "AIを使って収益化を目指していますか？"
+        ];
+        
+        const results = [
+            {
+                title: "AI未開拓タイプ",
+                description: "あなたはAIの世界をまだ探索していません。これは問題ではなく、むしろチャンスです！これから学ぶことで大きな成長が期待できます。まずは基本的なAIツールから試してみることをお勧めします。"
+            },
+            {
+                title: "AI迷子タイプ",
+                description: "あなたはAIに興味を持ち始めていますが、まだ活用方法を模索している段階です。具体的な目標を設定し、AIの特性を理解することで、より効果的に活用できるでしょう。オンラインコースや実践的なチュートリアルを試してみてください。"
+            },
+            {
+                title: "AI成功者タイプ",
+                description: "あなたはAIを活用する素質があります！すでにAIの可能性を理解し、積極的に取り入れようとしている姿勢が素晴らしいです。さらに知識を深め、具体的なプロジェクトに取り組むことで、AIを最大限に活用できるでしょう。"
+            }
+        ];
+        
+        function updateProgressBar() {
+            const progressPercent = (currentQuestion / questions.length) * 100;
+            document.getElementById("progress").style.width = progressPercent + "%";
+        }
+        
+        function selectOption(value) {
+            score += value;
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                // Update question with fade effect
+                const questionContainer = document.getElementById("question-container");
+                questionContainer.classList.remove("fade");
+                
+                // Trigger reflow
+                void questionContainer.offsetWidth;
+                
+                document.getElementById("question-text").textContent = questions[currentQuestion];
+                questionContainer.classList.add("fade");
+                updateProgressBar();
+            } else {
+                showResult();
+            }
+        }
+        
+        function showResult() {
+            document.getElementById("question-container").style.display = "none";
+            document.getElementById("result-container").style.display = "block";
+            
+            // Set progress bar to 100%
+            document.getElementById("progress").style.width = "100%";
+            
+            let resultIndex = 0;
+            if (score >= 2) {
+                resultIndex = 2; // AI成功者タイプ
+            } else if (score === 1) {
+                resultIndex = 1; // AI迷子タイプ
+            } // else stays at 0 for AI未開拓タイプ
+            
+            document.getElementById("result-title").textContent = results[resultIndex].title;
+            document.getElementById("result-description").textContent = results[resultIndex].description;
+        }
+        
+        function restartQuiz() {
+            score = 0;
+            currentQuestion = 0;
+            document.getElementById("question-text").textContent = questions[0];
+            document.getElementById("result-container").style.display = "none";
+            document.getElementById("question-container").style.display = "block";
+            document.getElementById("progress").style.width = "0%";
+        }
+        
+        // Initialize progress bar
+        updateProgressBar();
+    </script>
+</body>
+</html>
